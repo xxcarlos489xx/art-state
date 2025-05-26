@@ -13,6 +13,7 @@
     "@google/genai": "^0.13.0",
     "@nuxtjs/color-mode": "^3.3.0",
     "@popperjs/core": "^2.11.8",
+    "@prisma/client": "^6.8.2",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "apexcharts": "^4.0.0",
@@ -34,6 +35,7 @@
     "@types/bootstrap": "^5.2.6",
     "perfect-scrollbar": "^1.5.5",
     "pinia": "^2.1.7",
+    "prisma": "^6.8.2",
     "sass": "^1.63.6",
     "sass-loader": "^13.3.2"
   }

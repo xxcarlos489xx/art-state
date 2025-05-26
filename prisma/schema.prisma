@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// npx prisma generate
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  nombre    String
+  correo    String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  topics    Topic[]
+
+  @@map("users") // nombre real de la tabla en minúsculas plural
+}
+
+model Topic {
+  id        Int       @id @default(autoincrement())
+  titulo    String
+  userId    Int       @map("user_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id])
+  sotas     Sota[]
+  papers    TopicPaper[]
+
+  @@map("topics")
+}
+
+model Paper {
+  id        Int      @id @default(autoincrement())
+  doi       String   @unique
+  titulo    String
+  ruta      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  topics    TopicPaper[]
+
+  @@map("papers")
+}
+
+model Sota {
+  id        Int      @id @default(autoincrement())
+  ruta      String
+  topicId   Int      @map("topic_id")
+  version   Int
+
+  topic     Topic    @relation(fields: [topicId], references: [id])
+
+  @@map("sotas")
+}
+
+model TopicPaper {
+  topicId Int    @map("topic_id")
+  paperId Int    @map("paper_id")
+  estado  String
+  rutaDb  String @map("ruta_db")
+
+  topic   Topic  @relation(fields: [topicId], references: [id])
+  paper   Paper  @relation(fields: [paperId], references: [id])
+
+  @@id([topicId, paperId])
+  @@map("topic_paper")
+}
