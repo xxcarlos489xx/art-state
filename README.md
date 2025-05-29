@@ -16,7 +16,7 @@ La aplicación permite cargar múltiples artículos científicos en formato PDF,
 
 **Tecnologías:**
 
-*   **Frontend:** Nuxt.js (Vue.js Framework)
+*   **Frontend:** Nuxt.js (Vue.js Framework) - Node >= v20.19.2
 *   **Backend & Lógica RAG:** Python (con librerías como Langchain, PyPDF, ChromaDB y la API de Google GenAI)
 
 Este sistema es el resultado de un proyecto de investigación centrado en la aplicación de técnicas avanzadas de procesamiento de lenguaje natural y modelos de lenguaje para automatizar y mejorar el proceso de revisión de literatura científica.
@@ -55,6 +55,15 @@ yarn dev
 
 # bun
 bun run dev
+```
+Migrate new tables or others add column, modify column, etc
+```bash
+npx prisma migrate dev --name name_migration
+```
+
+View tables
+```bash
+npx prisma studio
 ```
 
 ## Production
