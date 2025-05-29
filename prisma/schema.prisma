@@ -17,7 +17,7 @@ datasource db {
 
 model User {
   id        Int       @id @default(autoincrement())
-  nombre    String
+  nombre    String?
   correo    String    @unique
   password  String
   createdAt DateTime  @default(now()) @map("created_at")
