@@ -17,6 +17,7 @@
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "apexcharts": "^4.0.0",
+    "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.10.5",
     "feather-icons": "^4.29.0",
@@ -27,11 +28,14 @@
     "vue": "^3.5.13",
     "vue-router": "^4.5.1",
     "vue3-apexcharts": "^1.4.4",
-    "vue3-form-wizard": "^0.2.4"
+    "vue3-form-wizard": "^0.2.4",
+    "yup": "^1.6.1",
+    "yup-locales": "^1.2.28"
   },
   "devDependencies": {
     "@nuxtjs/google-fonts": "^3.0.2",
     "@pinia/nuxt": "^0.4.11",
+    "@types/bcrypt": "^5.0.2",
     "@types/bootstrap": "^5.2.6",
     "perfect-scrollbar": "^1.5.5",
     "pinia": "^2.1.7",
