@@ -21,7 +21,7 @@ export class TopicService {
 async createTopic(titulo: string, userId: number) {
   const slug = slugify(titulo, { lower: true, strict: true })
 
-  const existing = await topicRepository.findBySlug(slug);
+  const existing = await topicRepository.findBySlug(slug, userId);
     
   if (existing){
       throw createError({

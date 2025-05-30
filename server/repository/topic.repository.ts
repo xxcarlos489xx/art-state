@@ -19,8 +19,9 @@ export class TopicRepository {
     return await prisma.topic.delete({ where: { id } })
   }
 
-  async findBySlug(slug: string) {
-    return prisma.topic.findFirst({ where: { slug } });
+  async findBySlug(slug: string, id:number = 0) {
+    if (id != 0)  return prisma.topic.findFirst({ where: { slug, id } });
+    else          return prisma.topic.findFirst({ where: { slug } });    
   }
 
   async findAllWithPaperCount() {
