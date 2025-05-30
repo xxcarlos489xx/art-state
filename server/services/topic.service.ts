@@ -1,4 +1,5 @@
-// server/services/user.service.ts
+// server/services/topic.service.ts
+import { Prisma } from '@prisma/client'
 import { TopicRepository } from '../repository/topic.repository'
 
 const topicRepository = new TopicRepository()
@@ -12,9 +13,14 @@ export class TopicService {
     return await topicRepository.findById(id)
   }
 
-  async createTopic(nombre: string, correo: string) {
-    return await topicRepository.create({ nombre, correo })
-  }
+async createTopic(titulo: string, userId: number) {
+  return await topicRepository.create({
+    titulo,
+    user: {
+      connect: { id: userId }
+    }
+  } as Prisma.TopicCreateInput)
+}
 
   async deleteTopic(id: number) {
     return await topicRepository.delete(id)

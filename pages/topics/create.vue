@@ -181,6 +181,7 @@
 </template>
 
 <script setup lang="ts">
+    import { useTopics } from '@/composables/useTopics'
     import useVuelidate from '@vuelidate/core'
     import { required, email } from '@vuelidate/validators'
     import { reactive, computed } from 'vue'
@@ -225,30 +226,6 @@
         await nextTick()
         
         if (!$v.value.$invalid) {
-            // opciones.value = [
-            //     {
-            //         select:false,
-            //         text:"IAB"
-            //     },
-            //     {
-            //         select:false,
-            //         text:"procesamiento de rx de pulmones"
-            //     },
-            //     {
-            //         select:false,
-            //         text:"detección de anomalías en imágenes médicas"
-            //     },
-            //     {
-            //         select:false,
-            //         text:"adolescentes"
-            //     },
-            //     {
-            //         select:false,
-            //         text:"cáncer de pulmón"
-            //     }
-            // ]
-            // return true
-
             try {
                 const data:any = await $fetch('/api/gemini/generate-topic', {
                     method: 'POST',
@@ -271,8 +248,6 @@
                     })
                     return false
                 }
-                // console.log(data?.statusCode)
-                // console.log(data.response)
             } catch (error) {
                 useToast().error({
                     title: 'Error!',
@@ -288,19 +263,35 @@
 
         return false
     }
-    const stepTwo = () => {
+    const stepTwo = async () => {
         const select = opciones.value.find(opt => opt.select);
+        console.log(select.text);
 
         if (select) {
-            useToast().success({ 
-                title: 'Success!', 
-                message: 'Creado con éxito',
-                timeout: 3000,
-                position: 'center',
-                layout: 2,
-            })
-            navigateTo('/topics/lista')
-            return true
+            try {
+                const { createTopic } = useTopics()
+                await createTopic(select.text)
+
+                useToast().success({
+                    title: 'Success!',
+                    message: 'Creado con éxito',
+                    timeout: 3000,
+                    position: 'center',
+                    layout: 2,
+                })
+
+                navigateTo('/topics/lista')
+                return true
+            } catch (err: any) {
+                useToast().error({
+                    title: 'Error!',
+                    message: err?.statusMessage || 'Ocurrió un error',
+                    timeout: 3000,
+                    position: 'center',
+                    layout: 2,
+                })
+                return false
+            }
         }else{
             useToast().error({
                 title: 'Error!',

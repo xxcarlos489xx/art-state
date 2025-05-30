@@ -1,5 +1,6 @@
 // server/repository/topic.repository.ts
-import  prisma  from '../plugins/prisma'
+import { Prisma } from '@prisma/client'
+import  prisma  from '~/server/libs/prisma'
 
 export class TopicRepository {
   async findAll() {
@@ -10,9 +11,9 @@ export class TopicRepository {
     return await prisma.topic.findUnique({ where: { id } })
   }
 
-//   async create(data: { nombre: string; correo: string }) {
-//     return await prisma.topic.create({ data })
-//   }
+  async create(data: Prisma.TopicCreateInput){
+    return await prisma.topic.create({ data })
+  }
 
   async delete(id: number) {
     return await prisma.topic.delete({ where: { id } })
