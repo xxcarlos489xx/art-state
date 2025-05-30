@@ -265,12 +265,11 @@
     }
     const stepTwo = async () => {
         const select = opciones.value.find(opt => opt.select);
-        console.log(select.text);
-
+        const comboOpciones = opciones.value.map(opt => opt.text)
         if (select) {
             try {
                 const { createTopic } = useTopics()
-                await createTopic(select.text)
+                await createTopic(select.text, comboOpciones)
 
                 useToast().success({
                     title: 'Success!',
@@ -285,7 +284,7 @@
             } catch (err: any) {
                 useToast().error({
                     title: 'Error!',
-                    message: err?.statusMessage || 'Ocurrió un error',
+                    message: err?.message || 'Ocurrió un error',
                     timeout: 3000,
                     position: 'center',
                     layout: 2,

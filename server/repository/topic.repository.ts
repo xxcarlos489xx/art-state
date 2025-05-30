@@ -18,4 +18,8 @@ export class TopicRepository {
   async delete(id: number) {
     return await prisma.topic.delete({ where: { id } })
   }
+
+  async findBySlug(slug: string) {
+    return prisma.topic.findFirst({ where: { slug } });
+  }
 }

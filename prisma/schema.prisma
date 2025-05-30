@@ -24,21 +24,23 @@ model User {
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  topics    Topic[]
+  topics Topic[]
 
   @@map("users") // nombre real de la tabla en minúsculas plural
 }
 
 model Topic {
-  id        Int       @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   titulo    String
-  userId    Int       @map("user_id")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+  slug      String
+  userId    Int           @map("user_id")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @default(now()) @updatedAt @map("updated_at")
+  options   TopicOption[]
 
-  user      User      @relation(fields: [userId], references: [id])
-  sotas     Sota[]
-  papers    TopicPaper[]
+  user   User         @relation(fields: [userId], references: [id])
+  sotas  Sota[]
+  papers TopicPaper[]
 
   @@map("topics")
 }
@@ -51,18 +53,18 @@ model Paper {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  topics    TopicPaper[]
+  topics TopicPaper[]
 
   @@map("papers")
 }
 
 model Sota {
-  id        Int      @id @default(autoincrement())
-  ruta      String
-  topicId   Int      @map("topic_id")
-  version   Int
+  id      Int    @id @default(autoincrement())
+  ruta    String
+  topicId Int    @map("topic_id")
+  version Int
 
-  topic     Topic    @relation(fields: [topicId], references: [id])
+  topic Topic @relation(fields: [topicId], references: [id])
 
   @@map("sotas")
 }
@@ -73,9 +75,20 @@ model TopicPaper {
   estado  String
   rutaDb  String @map("ruta_db")
 
-  topic   Topic  @relation(fields: [topicId], references: [id])
-  paper   Paper  @relation(fields: [paperId], references: [id])
+  topic Topic @relation(fields: [topicId], references: [id])
+  paper Paper @relation(fields: [paperId], references: [id])
 
   @@id([topicId, paperId])
   @@map("topic_paper")
+}
+
+model TopicOption {
+  id      Int    @id @default(autoincrement())
+  titulo  String
+  slug    String
+  topicId Int    @map("topic_id")
+
+  topic Topic @relation(fields: [topicId], references: [id])
+
+  @@map("topic_options")
 }
