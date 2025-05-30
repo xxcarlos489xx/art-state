@@ -7,7 +7,6 @@ export const useTopics = () => {
         })
         return data
     } catch (error: any) {
-        console.log(error);        
         throw createError({
             statusCode: error?.statusCode || 500,
             message: error?.data?.message || 'Error al crear el tema',
@@ -15,7 +14,19 @@ export const useTopics = () => {
     }
   }
 
+  const listTopics = async () => {
+    try {
+      return await $fetch('/api/topics/all')
+    } catch (error: any) {
+      throw createError({
+        statusCode: error?.statusCode || 500,
+        message: error?.data?.message || 'Error al obtener los temas',
+      })
+    }
+  }
+
   return {
     createTopic,
+    listTopics
   }
 }

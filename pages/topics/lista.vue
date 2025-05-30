@@ -31,8 +31,8 @@
                 <tbody>
                     <tr v-for="(fila, index) in filas" :key="index">
                     <td>{{ fila.topic }}</td>
-                    <td>{{ fila.detalle }}</td>
-                    <td>{{ fila.detalle }}</td>
+                    <td>{{ fila.countPaper }}</td>
+                    <td>{{ fila.sota }}</td>
                     <td>
                         <div class="dropdown">
                         <button
@@ -44,8 +44,16 @@
                             <i class="bi bi-gear"></i>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Editar</a></li>
-                            <li><a class="dropdown-item" href="#">Eliminar</a></li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-upload"></i>&nbsp;Cargar Paper
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#">
+                                    <i class="bi bi-brush"></i>&nbsp;Generar Sota
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Ver más</a></li>
                         </ul>
@@ -59,14 +67,25 @@
 </template>
 
 <script setup lang="ts">
-    const filas = [
-    { topic: 'Tema 1', detalle: 'Detalle del tema 1' },
-    { topic: 'Tema 2', detalle: 'Detalle del tema 2' },
-    { topic: 'Tema 3', detalle: 'Detalle del tema 3' },
-    ]
+    import { useTopics } from '@/composables/useTopics'
+
+    const { listTopics } = useTopics()
+    const topics = ref([])
+
     definePageMeta({
         layout: 'vertical'
     })
+
+    onMounted(async () => {
+        topics.value = await listTopics()
+    })
+    const filas = computed(() =>
+        topics.value.map((t:any) => ({
+            topic: t.titulo,
+            sota: t.sotas.lenght > 0 ? t.sotas[0] : '-',
+            countPaper: t._count.papers
+        }))
+    )
 </script>
 
 <!-- <style scoped>

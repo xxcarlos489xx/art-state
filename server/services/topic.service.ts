@@ -10,6 +10,10 @@ export class TopicService {
     return await topicRepository.findAll()
   }
 
+  async getTopicsWithPaperCount() {
+    return await topicRepository.findAllWithPaperCount()
+  }
+
   async getTopic(id: number) {
     return await topicRepository.findById(id)
   }

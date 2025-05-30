@@ -22,4 +22,20 @@ export class TopicRepository {
   async findBySlug(slug: string) {
     return prisma.topic.findFirst({ where: { slug } });
   }
+
+  async findAllWithPaperCount() {
+    return await prisma.topic.findMany({
+      include: {
+        _count: {
+          select: { papers: true }
+        },
+        sotas: {
+          take: 1,
+          orderBy: {
+            id: 'desc'
+          }
+        }
+      }
+    })
+  }
 }
