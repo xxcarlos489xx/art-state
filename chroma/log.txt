@@ -1,0 +1,7 @@
+[2025-06-01 22:14:38] Script Python ejecutado.
+[2025-06-01 22:14:38] Parámetro recibido: 2
+---------------------------------------
+[2025-06-01 22:15:16] Script Python ejecutado.
+[2025-06-01 22:15:16] Parámetro recibido: 3
+---------------------------------------
+2025-06-01 22:18:07 - Base vectorial creada: db_6

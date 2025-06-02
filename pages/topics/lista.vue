@@ -77,7 +77,19 @@
     })
 
     onMounted(async () => {
-        topics.value = await listTopics()
+        try {
+            const data = await listTopics()
+            topics.value = data               
+        } catch (err: any) {
+            useToast().error({
+                title: 'Error!',
+                // message: err?.message || 'Ocurrió un error',
+                message: 'Error al cargar el listado',
+                timeout: 3000,
+                position: 'center',
+                layout: 2,
+            })
+        }
     })
     const filas = computed(() =>
         topics.value.map((t:any) => ({

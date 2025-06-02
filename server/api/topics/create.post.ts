@@ -20,14 +20,29 @@ export default defineEventHandler(async (event) => {
   for (const opcion of opciones) {
     await topicOptionService.create(opcion, topic.id);
   }
-  
-  // Ejecutar script Python en background pasando el id
+
+  // crear db vectorial
+  const pythonPath  = join(process.cwd(), 'scripts', 'Scripts', 'python.exe')
   const scriptPath  = join(process.cwd(), 'scripts', 'crear_vector_db.py')
-  const pyProcess   = spawn('python', [scriptPath, topic.id.toString()], {
+  const idTopic     = (topic.id).toString()
+
+  const scriptArgs = [
+    scriptPath,
+    idTopic
+    // "otro_parametro"
+  ];
+
+  // Ejecutar python en segundo plano (sin bloquear)
+  const pyProcess = spawn(pythonPath, scriptArgs, {
     detached: true,
-    stdio: 'ignore'
+    stdio: 'ignore',
   })
+
   pyProcess.unref()
 
+  pyProcess.on('error', (err) => {
+    console.error(`Error al iniciar el script de Python: ${err.message}`);
+  });
+  
   return { success: true, topic };
 });

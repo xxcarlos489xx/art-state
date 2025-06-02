@@ -1,1 +1,7 @@
+Include
+Lib
+Scripts
 log.txt
+pyvenv.cfg
+share
+chroma/
