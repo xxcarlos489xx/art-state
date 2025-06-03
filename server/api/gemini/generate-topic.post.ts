@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    const ai = new GoogleGenAI({ apiKey: "AIzaSyBOyS8Kpr1Fk57g4fE_DIuFlld9gt8Uen8" });
+    const ai = new GoogleGenAI({ apiKey: useRuntimeConfig().GEMINI_API_KEY });
 
     let fields = `${step1.area}, ${step1.tema}, ${step1.problema}, ${step1.metodologia}`
 

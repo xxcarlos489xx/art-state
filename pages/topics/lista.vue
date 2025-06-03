@@ -36,6 +36,7 @@
                     <td>
                         <div class="dropdown">
                         <button
+                            :disabled="isLoading"
                             class="btn btn-secondary dropdown-toggle"
                             type="button"
                             data-bs-toggle="dropdown"
@@ -77,10 +78,13 @@
 <script setup lang="ts">
     import { useTopics } from '@/composables/useTopics'
 
-    const { listTopics, uploadPaper }    =   useTopics()
+    const { listTopics, uploadPaper }   =   useTopics()
+    const { check } = useGemini()
+    const { validateDOI } = useScopus()
     const topics            =   ref([])
     const fileInputRef      =   ref<HTMLInputElement | null>(null)
     const currentTopicForUpload =   ref<any | null>(null)
+    const isLoading = ref(false)
 
     definePageMeta({
         layout: 'vertical'
@@ -148,16 +152,52 @@
                 })
                 return
             }
+            isLoading.value = true
 
-            await uploadPaper(file, String(topicId))
-
-            useToast().success({
-                title: 'Éxito',
-                message: 'El paper fue subido correctamente.',
-                timeout: 3000,
+            useToast().info({
+                title: 'Analizando documento, por favor espere...',
+                timeout: false,
+                close: false,
                 position: 'center',
-                layout: 2
+                layout: 2,
             })
+
+            const doiResponse = await check(file)
+
+            if (!doiResponse?.exito || !doiResponse.doi) {
+                isLoading.value = false
+                useToast().destroy()
+                useToast().error({
+                    title: 'DOI no encontrado',
+                    message: doiResponse?.mensaje || 'El paper no contiene un DOI válido.',
+                    timeout: 3000,
+                    position: 'center',
+                    layout: 2,
+                })
+                return
+            }
+            console.log('DOI detectado:', doiResponse.doi)
+
+            // Segunda validación con Scopus
+            const scopusResult = await validateDOI(doiResponse.doi)
+
+            if (!scopusResult.valid) {
+                useToast().error({
+                    title: 'DOI inválido',
+                    message: scopusResult.reason,
+                })
+                return
+            }
+
+            // await uploadPaper(file, String(topicId))
+
+            // useToast().success({
+            //     title: 'Éxito',
+            //     message: 'El paper fue subido correctamente.',
+            //     timeout: 3000,
+            //     position: 'center',
+            //     layout: 2
+            // })
 
             const data = await listTopics()
             topics.value = data

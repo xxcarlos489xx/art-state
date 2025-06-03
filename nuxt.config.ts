@@ -26,8 +26,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-10',
   runtimeConfig: {
     public: {}, // Variables públicas (opcional)
-    scopusApiKey: process.env.NUXT_SCOPUS_API_KEY, // Privada (solo server-side)
-    openaiApiKey: process.env.NUXT_OPENAI_API_KEY,
+    geminiApiKey: process.env.GEMINI_API_KEY,
+    scopusApiKey: process.env.SCOPUS_API_KEY, 
+    // openaiApiKey: process.env.NUXT_OPENAI_API_KEY,//https://dev.elsevier.com/
   },
   nitro: {
     plugins: ['~/server/plugins/error-nitro.ts']
