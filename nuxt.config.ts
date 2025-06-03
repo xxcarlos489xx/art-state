@@ -27,7 +27,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {}, // Variables públicas (opcional)
     geminiApiKey: process.env.GEMINI_API_KEY,
-    scopusApiKey: process.env.SCOPUS_API_KEY, 
+    devScopusApiKey: process.env.DEV_SCOPUS_API_KEY, 
     // openaiApiKey: process.env.NUXT_OPENAI_API_KEY,//https://dev.elsevier.com/
   },
   nitro: {

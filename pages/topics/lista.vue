@@ -189,6 +189,8 @@
                 return
             }
 
+            console.log('DOI válido:', doiResponse.doi)
+
             // await uploadPaper(file, String(topicId))
 
             // useToast().success({

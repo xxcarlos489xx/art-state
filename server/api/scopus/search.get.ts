@@ -14,15 +14,13 @@ export default defineEventHandler(async (event) => {
     try {
       // URL de la API de Scopus (documentación: https://dev.elsevier.com/sc_apis.html)
       const apiUrl = "https://api.elsevier.com/content/search/scopus";
-      console.log("xxxx", useRuntimeConfig().scopusApiKey);
-      console.log("geminixxxx", useRuntimeConfig().geminiApiKey);
       
       // Hacemos la petición a Scopus
       const response = await $fetch<ScopusSearchResponse>(apiUrl, {
         query: {
           query: query.query,
           start: query.start || 0,
-          apiKey: "caff5d68cdb171eabd03da526acae45d",
+          apiKey: config.devScopusApiKey,
           count: query.count || 25, // Límite de resultados (opcional)
         },
         headers: {
