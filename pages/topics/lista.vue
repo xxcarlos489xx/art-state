@@ -176,12 +176,14 @@
                 })
                 return
             }
-            console.log('DOI detectado:', doiResponse.doi)
+            // console.log('DOI detectado:', doiResponse.doi)
 
             // Segunda validación con Scopus
             const scopusResult = await validateDOI(doiResponse.doi)
 
             if (!scopusResult.valid) {
+                isLoading.value = false
+                useToast().destroy()
                 useToast().error({
                     title: 'DOI inválido',
                     message: scopusResult.reason,
@@ -189,21 +191,26 @@
                 return
             }
 
-            console.log('DOI válido:', doiResponse.doi)
+            // console.log('DOI válido:', doiResponse.doi)
 
-            // await uploadPaper(file, String(topicId))
+            await uploadPaper(file, String(topicId), doiResponse.doi)
+            
+            useToast().destroy()
 
-            // useToast().success({
-            //     title: 'Éxito',
-            //     message: 'El paper fue subido correctamente.',
-            //     timeout: 3000,
-            //     position: 'center',
-            //     layout: 2
-            // })
+            useToast().success({
+                title: 'Éxito',
+                message: 'El paper fue subido correctamente.',
+                timeout: 3000,
+                position: 'center',
+                layout: 2
+            })
+            isLoading.value = false
 
-            const data = await listTopics()
-            topics.value = data
+            const data      =   await listTopics()
+            topics.value    =   data
         } catch (error: any) {
+            useToast().destroy()
+            isLoading.value = false
             useToast().error({
                 title: 'Error!',
                 message: error?.message || 'Error al subir el archivo',

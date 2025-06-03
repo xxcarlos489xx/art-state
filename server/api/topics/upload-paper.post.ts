@@ -4,6 +4,7 @@ import { uploadPaperSchema } from "~/server/libs/validation/topic";
 import { TopicService } from "~/server/services/topic.service";
 import { mkdirSync, existsSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { generateFileName } from "~/server/utils/file-util";
 
 const topicService = new TopicService();
 
@@ -18,11 +19,12 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const topicId   = formData.find(field => field.name === 'topicId')?.data?.toString()
-    const pdfFile   = formData.find(field => field.name === 'pdfFile')
-    const schema    = uploadPaperSchema();
+    const topicId   =   formData.find(field => field.name === 'topicId')?.data?.toString()
+    const nroDoi    =   formData.find(field => field.name === 'nroDoi')?.data?.toString()
+    const pdfFile   =   formData.find(field => field.name === 'pdfFile')
+    const schema    =   uploadPaperSchema();
 
-    await schema.validate({topicId, pdfFile}, { abortEarly: false });
+    await schema.validate({topicId, nroDoi, pdfFile}, { abortEarly: false });
 
     if (pdfFile?.type !== 'application/pdf') {
         throw createError({
@@ -45,8 +47,10 @@ export default defineEventHandler(async (event) => {
     const storageDir = join(process.cwd(), 'server/storage', slug)
 
     if (!existsSync(storageDir))    mkdirSync(storageDir, { recursive: true })
-    
-    const filePath = join(storageDir, pdfFile.filename || 'uploaded.pdf')
+
+    const fileName  =   `${pdfFile.filename}.pdf`
+    const filePath  =   join(storageDir, generateFileName(fileName || 'uploaded.pdf') )
+
     writeFileSync(filePath, pdfFile.data)
 
     return {

@@ -25,11 +25,12 @@ export const useTopics = () => {
     }
   }
 
-  const uploadPaper = async (file: File, topicId: string) => {
+  const uploadPaper = async (file: File, topicId: string, doi: string) => {
      try {
       const formData = new FormData()
       formData.append('pdfFile', file)
       formData.append('topicId', topicId)
+      formData.append('nroDoi', doi)
 
       const response = await $fetch('/api/topics/upload-paper', {
         method: 'POST',

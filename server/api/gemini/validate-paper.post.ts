@@ -56,10 +56,8 @@ export default defineEventHandler(async (event) => {
       ],
     })
 
-    const output    =   completion.text as string
-    console.log(output);
-    
-    const doi   =   extractDOI(output)
+    const output  = completion.text as string
+    const doi     = extractDOI(output)
 
     if (!doi) {
         return {
@@ -75,7 +73,7 @@ export default defineEventHandler(async (event) => {
         mensaje: null,
     }
   } catch (error) {
-    console.error('Gemini PDF analysis error:', error)
+    // console.error('Gemini PDF analysis error:', error)
     throw createError({
       statusCode: 500,
       message: 'Error al analizar el archivo PDF con Gemini',

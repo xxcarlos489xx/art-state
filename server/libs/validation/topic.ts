@@ -8,5 +8,6 @@ export const createTopicSchema = () =>
 export const uploadPaperSchema = () =>
   yup.object({
     topicId: yup.string().required(),
+    nroDoi: yup.string().required(),
     pdfFile: yup.mixed().required(),
   });
