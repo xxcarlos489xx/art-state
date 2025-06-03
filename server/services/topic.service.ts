@@ -18,29 +18,33 @@ export class TopicService {
     return await topicRepository.findById(id)
   }
 
-async createTopic(titulo: string, userId: number) {
-  const slug = slugify(titulo, { lower: true, strict: true })
+  async createTopic(titulo: string, userId: number) {
+    const slug = slugify(titulo, { lower: true, strict: true })
 
-  const existing = await topicRepository.findBySlug(slug, userId);
-    
-  if (existing){
-      throw createError({
-          statusCode: 409,
-          statusMessage: 'Conflict',
-          message: 'El topic ya está registrado'
-      })
-  }
-
-  return await topicRepository.create({
-    titulo,
-    slug,
-    user: {
-      connect: { id: userId }
+    const existing = await topicRepository.findBySlug(slug, userId);
+      
+    if (existing){
+        throw createError({
+            statusCode: 409,
+            statusMessage: 'Conflict',
+            message: 'El topic ya está registrado'
+        })
     }
-  } as Prisma.TopicCreateInput)
-}
+    
+    return await topicRepository.create({
+      titulo,
+      slug,
+      user: {
+        connect: { id: userId }
+      }
+    } as Prisma.TopicCreateInput)
+  }
 
   async deleteTopic(id: number) {
     return await topicRepository.delete(id)
+  }
+
+  async createPaper(file:File, idTopic:string){
+
   }
 }

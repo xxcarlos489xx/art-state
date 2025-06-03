@@ -45,7 +45,7 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="#">
+                                 <a class="dropdown-item" href="#" @click.prevent="promptFileUpload(fila)">
                                     <i class="bi bi-upload"></i>&nbsp;Cargar Paper
                                 </a>
                             </li>
@@ -63,14 +63,24 @@
                 </tbody>
             </table>
         </section>
+
+        <input
+            type="file"
+            ref="fileInputRef"
+            style="display: none"
+            accept=".pdf"
+            @change="handleFileSelected"
+        />
     </div>
 </template>
 
 <script setup lang="ts">
     import { useTopics } from '@/composables/useTopics'
 
-    const { listTopics } = useTopics()
-    const topics = ref([])
+    const { listTopics, uploadPaper }    =   useTopics()
+    const topics            =   ref([])
+    const fileInputRef      =   ref<HTMLInputElement | null>(null)
+    const currentTopicForUpload =   ref<any | null>(null)
 
     definePageMeta({
         layout: 'vertical'
@@ -93,11 +103,74 @@
     })
     const filas = computed(() =>
         topics.value.map((t:any) => ({
+            id: t.id,
             topic: t.titulo,
             sota: t.sotas.lenght > 0 ? t.sotas[0] : '-',
             countPaper: t._count.papers
         }))
     )
+
+    const promptFileUpload = (topicData: any) => {
+        currentTopicForUpload.value = topicData; // Guardamos el topic actual
+        fileInputRef.value?.click(); // Abrimos el diálogo de selección de archivo
+    }
+
+    const handleFileSelected = async (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (target.files && target.files.length > 0) {
+            const file = target.files[0];
+
+            if (!currentTopicForUpload.value) {
+                useToast().error({ title: 'Error', message: 'No se seleccionó un topic.' });
+                return;
+            }
+            if (file.type !== 'application/pdf') {
+                useToast().error({ title: 'Archivo no válido', message: 'Por favor, selecciona un archivo PDF.' });
+                target.value = ''; // Limpiar el input
+                return;
+            }
+
+            await uploadFile(currentTopicForUpload.value.id, file); // Pasamos el ID del topic y el archivo
+            target.value = ''; // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
+            currentTopicForUpload.value = null; // Limpiar el topic actual
+        }
+    }
+
+    const uploadFile = async (topicId: string | number, file: File) => {
+        try {
+            if (file.type !== 'application/pdf') {
+                useToast().error({
+                    title: 'Archivo inválido',
+                    message: 'El archivo debe ser un PDF.',
+                    timeout: 3000,
+                    position: 'center',
+                    layout: 2,
+                })
+                return
+            }
+
+            await uploadPaper(file, String(topicId))
+
+            useToast().success({
+                title: 'Éxito',
+                message: 'El paper fue subido correctamente.',
+                timeout: 3000,
+                position: 'center',
+                layout: 2
+            })
+
+            const data = await listTopics()
+            topics.value = data
+        } catch (error: any) {
+            useToast().error({
+                title: 'Error!',
+                message: error?.message || 'Error al subir el archivo',
+                timeout: 3000,
+                position: 'center',
+                layout: 2,
+            })
+        }        
+    }
 </script>
 
 <!-- <style scoped>

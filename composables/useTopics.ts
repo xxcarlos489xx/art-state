@@ -25,8 +25,29 @@ export const useTopics = () => {
     }
   }
 
+  const uploadPaper = async (file: File, topicId: string) => {
+     try {
+      const formData = new FormData()
+      formData.append('pdfFile', file)
+      formData.append('topicId', topicId)
+
+      const response = await $fetch('/api/topics/upload-paper', {
+        method: 'POST',
+        body: formData,
+      })
+
+      return response
+    } catch (error: any) {
+      throw createError({
+        statusCode: error?.statusCode || 500,
+        message: error?.data?.message || 'Error al subir el paper',
+      })
+    }
+  }
+
   return {
     createTopic,
-    listTopics
+    listTopics,
+    uploadPaper
   }
 }
