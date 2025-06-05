@@ -5,11 +5,13 @@ import { TopicService } from "~/server/services/topic.service";
 import { mkdirSync, existsSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { generateFileName } from "~/server/utils/file-util";
+import { PaperService } from "~/server/services/paper.service";
 
 const topicService = new TopicService();
-
+const paperService = new PaperService();
 
 export default defineEventHandler(async (event) => {
+    const USER_ID  = 1
     const formData = await readMultipartFormData(event)
 
     if (!formData) {
@@ -42,19 +44,31 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const slug = topic.slug
+    const exist_paper = await paperService.getPaperByDoi(nroDoi as string, USER_ID);
+
+    if (exist_paper?.id) {
+        throw createError({
+            statusCode: 400,
+            message: 'Paper ya registrado.',
+        })
+    }
+
+    const slug = `${topic.slug}_${USER_ID}`
 
     const storageDir = join(process.cwd(), 'server/storage', slug)
 
     if (!existsSync(storageDir))    mkdirSync(storageDir, { recursive: true })
 
-    const fileName  =   `${pdfFile.filename}.pdf`
-    const filePath  =   join(storageDir, generateFileName(fileName || 'uploaded.pdf') )
+    const fileName      =   `${pdfFile.filename}` || 'uploaded.pdf'
+    const encrypt_name  =   generateFileName(fileName)
+    const filePath      =   join(storageDir, encrypt_name )
 
     writeFileSync(filePath, pdfFile.data)
 
+    await paperService.createPaper(nroDoi as string, fileName, encrypt_name, USER_ID, topic.id)
+
     return {
-        message: 'Archivo subido correctamente',
+        message: 'Paper subido correctamente',
         topicId: topic.id,
         path: filePath,
     }

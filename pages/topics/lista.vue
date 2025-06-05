@@ -165,6 +165,8 @@
             const doiResponse = await check(file)
 
             if (!doiResponse?.exito || !doiResponse.doi) {
+                console.log(doiResponse);
+                
                 isLoading.value = false
                 useToast().destroy()
                 useToast().error({

@@ -37,7 +37,8 @@ export default defineEventHandler(async (event) => {
     })
 
     const completion = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      // model: "gemini-2.0-flash",
+      model: "gemini-2.0-flash-lite",
       contents: [
         {
           role: 'user',
@@ -76,7 +77,7 @@ export default defineEventHandler(async (event) => {
     // console.error('Gemini PDF analysis error:', error)
     throw createError({
       statusCode: 500,
-      message: 'Error al analizar el archivo PDF con Gemini',
+      message: 'Error al analizar el archivo PDF',
       data: error,
     })
   } finally {
