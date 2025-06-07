@@ -1,38 +1,41 @@
 from datetime import datetime
 import sys
-import chromadb
-from chromadb.config import Settings
 import traceback
-from chromadb.errors import NotFoundError
 import os
 import traceback
+from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
+from langchain.vectorstores import Chroma
+from dotenv import load_dotenv
 
 script_dir  =   os.path.dirname(os.path.abspath(__file__))
-log_path    =   os.path.join(script_dir, "log.txt")
+dotenv_path =   os.path.join(script_dir, "..", ".env")
+log_path    =   os.path.join(script_dir, "log_chroma.txt")
 timestamp   =   datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+load_dotenv(dotenv_path)
 
-id_topic = "No se recibió id" 
+if len(sys.argv) < 2:
+    with open(log_path, "a") as f:
+        f.write(f"{timestamp} - No se recibió id_topic\n")
+    sys.exit(1)
 
-if len(sys.argv) > 1:
-    id_topic = sys.argv[1]
-    try:
-        # print("Directorio actual:", os.getcwd())
-        db_name = f"db_{id_topic}"
-        client = chromadb.PersistentClient() 
+topic_id = sys.argv[1]
+persist_directory = os.path.join(script_dir, "chroma", f"db_{topic_id}")
 
-        try:
-            collection = client.get_collection(db_name)
-        except NotFoundError:
-            collection = client.create_collection(db_name)
+os.makedirs(persist_directory, exist_ok=True)
 
-        with open(log_path, "a") as f:
-            f.write(f"{timestamp} - Base vectorial creada: {db_name}\n")
+try:
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-    except Exception as e:
-        with open(log_path, "a") as f:
-            f.write(f"{timestamp} - ERROR creando base vectorial: {e}\n")
-            f.write(traceback.format_exc() + "\n")
-else:
-    with open(log_path, "a", encoding="utf-8") as f:
-        f.write(f"[{timestamp}] Parámetro recibido: {id_topic}\n")
-        f.write("---------------------------------------\n")
+    with open(log_path, "a") as f:
+        f.write(f"{timestamp} - Base vectorial creada o cargada en: {persist_directory}\n")
+
+    # Crear o cargar base vectorial para topic_id
+    vectordb = Chroma(
+        persist_directory=persist_directory,
+        embedding_function=embeddings
+    )
+
+except Exception as e:
+    with open(log_path, "a") as f:
+        f.write(f"{timestamp} - ERROR creando base vectorial: {str(e)}\n")
+        f.write(traceback.format_exc() + "\n")

@@ -6,6 +6,7 @@ import { mkdirSync, existsSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { generateFileName } from "~/server/utils/file-util";
 import { PaperService } from "~/server/services/paper.service";
+import { spawn } from 'child_process'
 
 const topicService = new TopicService();
 const paperService = new PaperService();
@@ -65,7 +66,27 @@ export default defineEventHandler(async (event) => {
 
     writeFileSync(filePath, pdfFile.data)
 
-    await paperService.createPaper(nroDoi as string, fileName, encrypt_name, USER_ID, topic.id)
+    const paper = await paperService.createPaper(nroDoi as string, fileName, encrypt_name, USER_ID, topic.id)
+
+    const pythonPath  = join(process.cwd(), 'scripts', 'Scripts', 'python.exe')
+    const scriptPath  = join(process.cwd(), 'scripts', 'procesar_pdf_embed.py')
+    const idTopic     = (topic.id).toString()
+
+    const scriptArgs = [
+    scriptPath,
+    idTopic,
+    filePath,
+    paper.id.toString(),
+    // "otro_parametro"
+    ];
+
+    // Ejecutar python en segundo plano (sin bloquear)
+    const pyProcess = spawn(pythonPath, scriptArgs, {
+    detached: true,
+    stdio: 'ignore',
+    })
+    
+    pyProcess.unref()
 
     return {
         message: 'Paper subido correctamente',

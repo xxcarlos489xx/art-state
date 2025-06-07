@@ -2,6 +2,7 @@ Include
 Lib
 Scripts
 log.txt
+log_chroma.txt
 pyvenv.cfg
 share
-chroma/
+chroma/*

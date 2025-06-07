@@ -16,7 +16,7 @@ export class PaperService {
 
   async createPaper(doi: string, titulo: string, ruta: string, userId: number, topicId:number) {
     const slug      = slugify(titulo, { lower: true, strict: true })
-    const existing  = await paperRepository.findByDoi(doi, userId);
+    const existing  = await paperRepository.findByDoi(doi, userId, topicId);
       
     if (existing){
         throw createError({
@@ -25,7 +25,9 @@ export class PaperService {
             message: 'El paper ya está registrado'
         })
     }
-    
+    // falta mejorar
+    // crear un topic_paper.service
+    // con el fin de validar si ya existe el paper asignado a un topic
     return await paperRepository.create({
       doi,
       titulo,

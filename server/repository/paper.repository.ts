@@ -7,7 +7,7 @@ export class PaperRepository {
     return await prisma.paper.findMany()
   }
 
-  async findByDoi(doi: string, userId:number) {
+  async findByDoi(doi: string, userId:number, topicId:number = 0) {
     return await prisma.paper.findFirst({
       where: {
         doi,

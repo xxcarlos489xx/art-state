@@ -1,0 +1,2 @@
+2025-06-05 20:00:19 - Embeddings guardados para topic 1, paper_id 1
+2025-06-05 20:02:54 - Embeddings guardados para topic 1, paper_id 2
