@@ -51,7 +51,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="#" @click.prevent="handleGenerateSota(fila)">
                                     <i class="bi bi-brush"></i>&nbsp;Generar Sota
                                 </a>
                             </li>
@@ -81,6 +81,8 @@
     const { listTopics, uploadPaper }   =   useTopics()
     const { check } = useGemini()
     const { validateDOI } = useScopus()
+    const { generateSota } = useSota()
+
     const topics            =   ref([])
     const fileInputRef      =   ref<HTMLInputElement | null>(null)
     const currentTopicForUpload =   ref<any | null>(null)
@@ -221,6 +223,45 @@
                 layout: 2,
             })
         }        
+    }
+
+    const handleGenerateSota = async (topic: any) => {
+        isLoading.value = true
+        useToast().info({
+            title: 'Generando SOTA...',
+            timeout: false,
+            close: false,
+            position: 'center',
+            layout: 2,
+        })
+
+        try {
+            const result = await generateSota(topic.id)
+            useToast().destroy()
+            useToast().success({
+                title: 'SOTA Generada',
+                message: 'La generación fue exitosa.',
+                timeout: 3000,
+                position: 'center',
+                layout: 2,
+            })
+
+            // Recargar lista
+            const data = await listTopics()
+            topics.value = data
+
+        } catch (error: any) {
+            useToast().destroy()
+            useToast().error({
+                title: 'Error al generar SOTA',
+                message: error.message || 'Inténtalo más tarde.',
+                timeout: 3000,
+                position: 'center',
+                layout: 2,
+            })
+        } finally {
+            isLoading.value = false
+        }
     }
 </script>
 

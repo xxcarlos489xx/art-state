@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 script_dir  =   os.path.dirname(os.path.abspath(__file__))
 dotenv_path =   os.path.join(script_dir, "..", ".env")
-log_path    =   os.path.join(script_dir, "log_chroma.txt")
+log_path    =   os.path.join(script_dir, "log_crear_db.txt")
 timestamp   =   datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 load_dotenv(dotenv_path)
 

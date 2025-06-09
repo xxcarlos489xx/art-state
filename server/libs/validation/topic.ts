@@ -11,3 +11,8 @@ export const uploadPaperSchema = () =>
     nroDoi: yup.string().required(),
     pdfFile: yup.mixed().required(),
   });
+
+export const generateSotaSchema = () =>
+  yup.object({
+    topicId: yup.number().required(),
+  });

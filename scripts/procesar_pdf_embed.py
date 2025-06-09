@@ -1,5 +1,4 @@
 # scripts/procesar_pdf_embed.py
-
 import sys, os
 from datetime import datetime
 import traceback
@@ -37,7 +36,9 @@ try:
     for doc in documents:
         doc.metadata["paper_id"] = paper_id
 
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    # splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+
     chunks = splitter.split_documents(documents)
 
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
