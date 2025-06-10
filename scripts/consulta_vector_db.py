@@ -82,7 +82,7 @@ if __name__ == "__main__":
         prompt = ChatPromptTemplate.from_template(template)
 
         # 4. Configurar el modelo de Gemini
-        llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.3, convert_system_message_to_human=True)
+        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-lite", temperature=0.3, convert_system_message_to_human=True)
         
         # 5. Crear la "cadena" de RAG (Retrieval-Augmented Generation)
         # Esto conecta el retriever, el prompt y el modelo en un flujo de trabajo.

@@ -161,7 +161,8 @@
                                                                             :id="'list-'+index+'-textarea'" 
                                                                             style="height: 100px;resize: none;"
                                                                             class="w-100" 
-                                                                            :value="item.text">
+                                                                            v-model="item.text"
+                                                                            >
                                                                 </textarea>
                                                         </div>                                                
                                                     </div>

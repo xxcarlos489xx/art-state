@@ -2,7 +2,9 @@ Include
 Lib
 Scripts
 log.txt
-log_chroma.txt
+log_crear_db.txt
+log_embed.txt
+log_sota.txt
 pyvenv.cfg
 share
 chroma/*

@@ -36,5 +36,10 @@ export default defineNuxtConfig({
   pages:true,
   devtools: {
     enabled: process.env.ENVIROMENT == "true" ? true : false
+  },
+  vite: {
+    server: {
+      allowedHosts: ['.ngrok-free.app'] // only dev
+    }
   }
 })

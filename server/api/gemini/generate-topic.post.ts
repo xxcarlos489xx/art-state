@@ -77,7 +77,7 @@ export default defineEventHandler(async (event) => {
     try {
         // Consulta a la API de OpenAI
         const completion = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
+            model: "gemini-2.0-flash-lite",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
