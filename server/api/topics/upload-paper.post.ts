@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
     if (!existsSync(storageDir))    mkdirSync(storageDir, { recursive: true })
 
     const fileName      =   `${pdfFile.filename}` || 'uploaded.pdf'
-    const encrypt_name  =   generateFileName(fileName)
+    const encrypt_name  =   `${generateFileName(fileName)}.pdf`
     const filePath      =   join(storageDir, encrypt_name )
 
     writeFileSync(filePath, pdfFile.data)
