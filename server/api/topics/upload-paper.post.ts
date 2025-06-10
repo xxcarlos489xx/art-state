@@ -73,17 +73,17 @@ export default defineEventHandler(async (event) => {
     const idTopic     = (topic.id).toString()
 
     const scriptArgs = [
-    scriptPath,
-    idTopic,
-    filePath,
-    paper.id.toString(),
-    // "otro_parametro"
+        scriptPath,
+        idTopic,
+        filePath,
+        paper.id.toString(),
+        // "otro_parametro"
     ];
 
     // Ejecutar python en segundo plano (sin bloquear)
     const pyProcess = spawn(pythonPath, scriptArgs, {
-    detached: true,
-    stdio: 'ignore',
+        detached: true,
+        stdio: 'ignore',
     })
     
     pyProcess.unref()

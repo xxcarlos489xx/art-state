@@ -12,8 +12,6 @@ from langchain.schema.runnable import RunnableMap
 from langchain.schema.output_parser import StrOutputParser
 from dotenv import load_dotenv
 from docx import Document
-import re
-from fpdf import FPDF
 
 # --- CONFIGURACIÓN Y LOGS (Consistente con tus otros scripts) ---
 script_dir  =   os.path.dirname(os.path.abspath(__file__))
@@ -79,7 +77,7 @@ def prepare_context_and_bibliography(docs):
         
         # Formatear el contexto para el LLM
         context_part = (
-            f"Fragmento de fuente (citar como [{ref_num_for_chunk}]):\n"
+            f"Contexto de la Referencia [{ref_num_for_chunk}]:\n"
             f"\"{doc.page_content}\""
         )
         formatted_context_parts.append(context_part)
@@ -158,37 +156,6 @@ def save_sota_to_db(topic_id, file_path):
             cursor.close()
             db_connection.close()
 
-def clean_citations_from_text(text):
-    """
-    Usa expresiones regulares para eliminar las citas en formato [n] del texto.
-    """
-    # La expresión regular busca un corchete de apertura [, seguido de uno o más dígitos \d+,
-    # y luego un corchete de cierre ]. El espacio \s*? busca opcionalmente espacios antes de la cita.
-    cleaned_text = re.sub(r'\s*\[[\d\s,]+\]', '', text)
-    return cleaned_text
-
-def save_body_to_pdf(body_text, file_path):
-    """
-    Guarda el texto del cuerpo del SOTA en un archivo PDF.
-    """
-    try:
-        pdf = FPDF()
-        pdf.add_page()
-        font_path = os.path.join(script_dir, "DejaVuSans.ttf")
-        pdf.add_font("DejaVu", "", font_path, uni=True)
-        pdf.set_font("DejaVu", size=12)        
-        pdf.multi_cell(0, 5, txt=body_text)        
-        pdf.output(file_path)
-        write_log(f"PDF del cuerpo guardado exitosamente en: {file_path}")
-
-    except Exception as e:
-        # FPDF puede dar un error si no encuentra la fuente. Este es un error común.
-        if "FPDF error: Can't open file" in str(e):
-            write_log("ERROR FPDF: No se encontró la fuente 'DejaVuSans.ttf'.")
-            write_log("Asegúrate de haber descargado la fuente y colocarla en el directorio del script o en una ruta conocida.")
-        write_log(f"ERROR al crear el archivo PDF: {str(e)}")
-        write_log(traceback.format_exc())
-
 # --- LÓGICA PRINCIPAL ---
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -197,7 +164,7 @@ if __name__ == "__main__":
 
     topic_id            =   sys.argv[1]
     topic_title         =   sys.argv[2]
-    output_path         =   sys.argv[3] #route save sota
+    output_path         =   sys.argv[3]
     persist_directory   =   os.path.join(script_dir, "chroma", f"db_{topic_id}")
     
     write_log(f"Iniciando generación de SOTA para topic_id: {topic_id} con título: '{topic_title}'")
@@ -231,8 +198,8 @@ if __name__ == "__main__":
         {context}
 
         --- DIRECTRICES DE REDACCIÓN Y ESTILO ---
-        1.  **Redacción Fluida:** Escribe un texto continuo, bien estructurado y académico. Comienza con una introducción, desarrolla el análisis en el cuerpo del texto y finaliza con una conclusión. NO uses subtítulos como "Introducción" o "Conclusión".
-        2.  **Citación Obligatoria:** Cuando uses información de un fragmento del contexto, DEBES citarlo usando el número que se te indica. Por ejemplo: `(citar como [1])` significa que debes poner `[1]` en el texto.
+        1.  **Redacción Fluida:** Escribe un texto continuo y académico. Organiza tus ideas en párrafos (introducción, desarrollo, conclusión) pero NO escribas los subtítulos.
+        2.  **CITACIÓN PRECISA Y OBLIGATORIA:** El contexto se proporciona en bloques como "Contexto de la Referencia [N]: ...". Cuando utilices información de uno de estos bloques, DEBES citar el número correspondiente `[N]` en tu texto. Por ejemplo, si usas información del "Contexto de la Referencia [1]", tienes que escribir `[1]` en tu redacción. Las únicas citas válidas son las que aparecen en el contexto.
         3.  **NO GENERES BIBLIOGRAFÍA:** NO añadas una sección de "Referencias" al final. Yo me encargaré de eso. Tu tarea es únicamente redactar el cuerpo del Estado del Arte con sus citas.
         4.  **Tono:** Mantén un tono formal y objetivo. Si encuentras información contradictoria, señálalo.
 
@@ -244,7 +211,7 @@ if __name__ == "__main__":
         prompt = ChatPromptTemplate.from_template(template)
 
         # 4. Configurar el modelo de Gemini
-        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-lite", temperature=0.4, convert_system_message_to_human=True)
+        llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-lite", temperature=0.3, convert_system_message_to_human=True)
         
         retrieved_docs = retriever.invoke(topic_title)
         if not retrieved_docs:
@@ -254,6 +221,7 @@ if __name__ == "__main__":
         else:
             formatted_context, bibliography_string = prepare_context_and_bibliography(retrieved_docs)
             
+            # write_log(f"==== CONTEXTO FORMATEADO ENVIADO A GEMINI ====\n{formatted_context}\n==============================================")
             # 3. Construir la cadena y ejecutarla
             rag_chain = (
                 RunnableMap({
@@ -273,18 +241,27 @@ if __name__ == "__main__":
             
             # 4. Ensamblar el resultado final
             sota_result = sota_body + "\n\n" + bibliography_string
-     
+        # # 5. Crear la "cadena" de RAG (Retrieval-Augmented Generation)
+        # # Esto conecta el retriever, el prompt y el modelo en un flujo de trabajo.
+        # rag_chain = (
+        #     {
+        #         "context": retriever | format_docs_with_sources, 
+        #         "question": RunnablePassthrough()
+        #     }
+        #     | prompt
+        #     | llm
+        #     | StrOutputParser()
+        # )
+
+        # 6. Ejecutar la cadena y generar el SOTA
+        # write_log(f"Invocando la cadena RAG con Gemini para el topic '{topic_title}'...")
+        # sota_result = rag_chain.invoke(topic_title)
+        # write_log(sota_result)        
         write_log(f"SOTA generado exitosamente. Guardando en la base de datos...")
 
-        sota_body_cleaned = clean_citations_from_text(sota_body)
-
-        path_word   =   os.path.join(output_path, "sota.docx")
-        path_pdf    =   os.path.join(output_path, "sota_body.pdf")
-
-        save_body_to_pdf(sota_body_cleaned, path_pdf)
-
-        save_sota_to_db(topic_id, path_word)
-        save_sota_to_docx(sota_result, topic_title, path_word)
+        # 7. Guardar el resultado en la base de datos MySQL
+        save_sota_to_db(topic_id, output_path)
+        save_sota_to_docx(sota_result, topic_title, output_path)
         
         write_log("Proceso completado.")
 

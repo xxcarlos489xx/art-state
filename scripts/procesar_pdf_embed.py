@@ -7,6 +7,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 from langchain.vectorstores import Chroma
 from dotenv import load_dotenv
+import re
 
 # Logs
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,11 +30,24 @@ os.makedirs(persist_directory, exist_ok=True)
 
 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+def clean_pdf_text(text):
+    """Limpia el texto de un PDF para eliminar patrones no deseados."""
+    # Eliminar pies de página comunes, números de página, etc.
+    text = re.sub(r'Page \d+ of \d+', '', text)
+    # Eliminar textos de copyright
+    text = re.sub(r'©.*', '', text)
+    text = re.sub(r'Published by.*', '', text)    
+    # Reemplazar múltiples saltos de línea con uno solo
+    text = re.sub(r'\n\s*\n', '\n', text)
+    
+    return text.strip()
+
 try:
     loader = PyPDFLoader(pdf_path)
     documents = loader.load()
 
     for doc in documents:
+        doc.page_content = clean_pdf_text(doc.page_content)
         doc.metadata["paper_id"] = paper_id
 
     # splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)

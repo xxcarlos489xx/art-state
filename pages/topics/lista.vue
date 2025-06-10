@@ -51,7 +51,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#" @click.prevent="handleGenerateSota(fila)">
+                                <a class="dropdown-item" @click.prevent="handleGenerateSota(fila)">
                                     <i class="bi bi-brush"></i>&nbsp;Generar Sota
                                 </a>
                             </li>
@@ -236,11 +236,11 @@
         })
 
         try {
-            const result = await generateSota(topic.id)
+            const { message } = await generateSota(topic.id)
             useToast().destroy()
             useToast().success({
                 title: 'SOTA Generada',
-                message: 'La generación fue exitosa.',
+                message: message,
                 timeout: 3000,
                 position: 'center',
                 layout: 2,
