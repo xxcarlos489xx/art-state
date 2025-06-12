@@ -102,6 +102,15 @@ bun run preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
+
+### Scripts python
+Instalar dependencias
+```bash
+pip install -r requirements.txt
+python install_nltk.py
+```
+
+
 ### Containers IA
 
 #### With run GPU's
