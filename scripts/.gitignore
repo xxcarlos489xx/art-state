@@ -5,6 +5,7 @@ log.txt
 log_crear_db.txt
 log_embed.txt
 log_sota.txt
+log_entropy.txt
 pyvenv.cfg
 share
 chroma/*

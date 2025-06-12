@@ -36,6 +36,7 @@
                     <td>
                         <div class="dropdown">
                         <button
+                            :ref="el => setButtonRef(el, fila.id)"
                             :disabled="isLoading"
                             class="btn btn-secondary dropdown-toggle"
                             type="button"
@@ -53,6 +54,11 @@
                             <li>
                                 <a class="dropdown-item" @click.prevent="handleGenerateSota(fila)">
                                     <i class="bi bi-brush"></i>&nbsp;Generar Sota
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" @click.prevent="handleGenerateEntropy(fila)">
+                                    <i class="bi bi-brush"></i>&nbsp;Calcular Entropía
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -76,21 +82,32 @@
 </template>
 
 <script setup lang="ts">
-    import { useTopics } from '@/composables/useTopics'
+    import { ref, onBeforeUpdate, onUpdated } from 'vue';
 
     const { listTopics, uploadPaper }   =   useTopics()
-    const { check } = useGemini()
-    const { validateDOI } = useScopus()
-    const { generateSota } = useSota()
+    const { check }                     =   useGemini()
+    const { validateDOI }               =   useScopus()
+    const { generateSota, generateEntropy } =   useSota()
 
     const topics            =   ref([])
     const fileInputRef      =   ref<HTMLInputElement | null>(null)
     const currentTopicForUpload =   ref<any | null>(null)
-    const isLoading = ref(false)
+    const isLoading     =   ref(false)
+    const buttonRefs    =   ref<Record<string | number, HTMLButtonElement>>({});
+
+    const setButtonRef = (el: HTMLButtonElement | null, id: number | string) => {
+        if (el) {
+            buttonRefs.value[id] = el;
+        }
+    };
 
     definePageMeta({
         layout: 'vertical'
     })
+
+    onBeforeUpdate(() => {
+        buttonRefs.value = {};
+    });
 
     onMounted(async () => {
         try {
@@ -239,7 +256,6 @@
             const { message } = await generateSota(topic.id)
             useToast().destroy()
             useToast().success({
-                title: 'SOTA Generada',
                 message: message,
                 timeout: 3000,
                 position: 'center',
@@ -254,6 +270,46 @@
             useToast().destroy()
             useToast().error({
                 title: 'Error al generar SOTA',
+                message: error.message || 'Inténtalo más tarde.',
+                timeout: 3000,
+                position: 'center',
+                layout: 2,
+            })
+        } finally {
+            isLoading.value = false
+        }
+    }
+
+    const handleGenerateEntropy = async (topic: any) => {
+        if (buttonRefs.value[topic.id]) buttonRefs.value[topic.id].click();
+        
+        isLoading.value = true
+        useToast().info({
+            title: 'Generando...',
+            timeout: false,
+            close: false,
+            position: 'center',
+            layout: 2,
+        })
+
+        try {
+            const { message } = await generateEntropy(topic.id)
+            useToast().destroy()
+            useToast().success({
+                message: message,
+                timeout: 3000,
+                position: 'center',
+                layout: 2,
+            })
+
+            // Recargar lista
+            const data = await listTopics()
+            topics.value = data
+
+        } catch (error: any) {
+            useToast().destroy()
+            useToast().error({
+                title: 'Error al generar entropía',
                 message: error.message || 'Inténtalo más tarde.',
                 timeout: 3000,
                 position: 'center',

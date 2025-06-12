@@ -16,3 +16,8 @@ export const generateSotaSchema = () =>
   yup.object({
     topicId: yup.number().required(),
   });
+
+export const generateEntropySchema = () =>
+  yup.object({
+    topicId: yup.number().required(),
+  });

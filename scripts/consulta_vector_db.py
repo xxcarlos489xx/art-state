@@ -146,7 +146,8 @@ def save_sota_to_db(topic_id, file_path):
                 INSERT INTO sotas (ruta, topic_id, version)
                 VALUES (%s, %s, %s)
             """
-            cursor.execute(insert_query, (file_path, topic_id, new_version))
+            web_path = '/' + os.path.join(*file_path.split(os.sep)[-3:]).replace('\\', '/')
+            cursor.execute(insert_query, (web_path, topic_id, new_version))
             db_connection.commit()
             write_log(f"Registro de SOTA v{new_version} guardado en la BD para topic_id: {topic_id}")
             
