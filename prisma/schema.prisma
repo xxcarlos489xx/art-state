@@ -68,6 +68,7 @@ model Sota {
   ruta    String
   topicId Int    @map("topic_id")
   version Int
+  img_entropy String?
   createdAt DateTime @default(now()) @map("created_at")
   
   topic Topic @relation(fields: [topicId], references: [id])
