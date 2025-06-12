@@ -26,7 +26,10 @@ export class TopicRepository {
 
   async findAllWithPaperCount() {
     return await prisma.topic.findMany({
-      include: {
+      select: {
+        id: true,
+        titulo: true,
+        slug: true,
         _count: {
           select: { papers: true }
         },
@@ -34,6 +37,10 @@ export class TopicRepository {
           take: 1,
           orderBy: {
             id: 'desc'
+          },
+          select: {
+            id: true,
+            img_entropy: true
           }
         }
       }

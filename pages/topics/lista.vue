@@ -32,7 +32,7 @@
                     <tr v-for="(fila, index) in filas" :key="index">
                     <td>{{ fila.topic }}</td>
                     <td>{{ fila.countPaper }}</td>
-                    <td>{{ fila.sota }}</td>
+                    <td>{{ fila.hasSota }}</td>
                     <td>
                         <div class="dropdown">
                         <button
@@ -128,13 +128,14 @@
         topics.value.map((t:any) => ({
             id: t.id,
             topic: t.titulo,
-            sota: t.sotas.lenght > 0 ? t.sotas[0] : '-',
-            countPaper: t._count.papers
+            hasSota: t.hasSota,
+            countPaper: t.papers
         }))
     )
 
-    const promptFileUpload = (topicData: any) => {
-        currentTopicForUpload.value = topicData; // Guardamos el topic actual
+    const promptFileUpload = (topic: any) => {
+        if (buttonRefs.value[topic.id]) buttonRefs.value[topic.id].click();
+        currentTopicForUpload.value = topic; // Guardamos el topic actual
         fileInputRef.value?.click(); // Abrimos el diálogo de selección de archivo
     }
 
@@ -243,6 +244,8 @@
     }
 
     const handleGenerateSota = async (topic: any) => {
+        if (buttonRefs.value[topic.id]) buttonRefs.value[topic.id].click();
+
         isLoading.value = true
         useToast().info({
             title: 'Generando SOTA...',

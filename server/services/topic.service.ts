@@ -11,7 +11,22 @@ export class TopicService {
   }
 
   async getTopicsWithPaperCount() {
-    return await topicRepository.findAllWithPaperCount()
+    const topics  = await topicRepository.findAllWithPaperCount()
+
+    return topics.map(topic => {
+      const firstSota   = Array.isArray(topic.sotas) && topic.sotas.length > 0 ? topic.sotas[0] : null;
+      const hasEntropy  = !!(firstSota?.img_entropy);
+      const hasSota     = firstSota ? true : false;
+      const papers      = topic._count.papers
+      const { sotas, _count, ...rest } = topic;
+
+      return {
+        ...rest,
+        hasEntropy,
+        hasSota,
+        papers
+      };
+    });
   }
 
   async getTopic(id: number) {
