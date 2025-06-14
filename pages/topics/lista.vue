@@ -25,6 +25,7 @@
                         <th scope="col">Topic</th>
                         <th scope="col">Papers</th>
                         <th scope="col">State of the Art</th>
+                        <th scope="col">Métricas</th>
                         <th scope="col">Config</th>
                     </tr>
                 </thead>
@@ -33,6 +34,18 @@
                     <td>{{ fila.topic }}</td>
                     <td>{{ fila.countPaper }}</td>
                     <td>{{ fila.hasSota }}</td>
+                    <td>
+                        <button 
+                                v-if="fila.hasEntropy" 
+                                class="btn btn-sm btn-outline-info" 
+                                data-bs-toggle="modal"
+                                data-bs-target="#analysisModal"
+                                @click="showAnalysisModal(fila.id)"
+                            >
+                            <i class="bi bi-bar-chart-line"></i> Ver Análisis
+                        </button>
+                        <span v-else class="text-muted">N/A</span>
+                    </td>
                     <td>
                         <div class="dropdown">
                         <button
@@ -78,22 +91,55 @@
             accept=".pdf"
             @change="handleFileSelected"
         />
+
+        <div class="modal fade" id="analysisModal" tabindex="-1" aria-labelledby="analysisModalLabel" aria-hidden="true" ref="modalRef">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="analysisModalLabel">Análisis de Diversidad Léxica</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <!-- Spinner de carga -->
+                        <div v-if="isLoadingImage" class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <!-- Imagen -->
+                        <img v-if="!isLoadingImage && imageUrl" :src="imageUrl" class="img-fluid" alt="Gráfica de análisis de entropía" />
+                        <!-- Mensaje de error -->
+                        <p v-if="!isLoadingImage && imageError" class="text-danger">{{ imageError }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
+    // import { Modal } from 'bootstrap';
     import { ref, onBeforeUpdate, onUpdated } from 'vue';
 
-    const { listTopics, uploadPaper }   =   useTopics()
-    const { check }                     =   useGemini()
-    const { validateDOI }               =   useScopus()
-    const { generateSota, generateEntropy } =   useSota()
+    const { listTopics, 
+            uploadPaper,
+            generateSota,
+            generateEntropy
+        }   =   useTopics()
+    const { check }             =   useGemini()
+    const { validateDOI }       =   useScopus()
+    const { pollingMetrics }    =   useSota()
 
     const topics            =   ref([])
     const fileInputRef      =   ref<HTMLInputElement | null>(null)
     const currentTopicForUpload =   ref<any | null>(null)
     const isLoading     =   ref(false)
     const buttonRefs    =   ref<Record<string | number, HTMLButtonElement>>({});
+
+    const pollingIntervals  =   ref<Record<number, NodeJS.Timeout>>({});
+
+    // modal metrics
+    const isLoadingImage    =   ref(false);
+    const imageUrl          =   ref<string | null>(null);
+    const imageError        =   ref<string | null>(null);
 
     const setButtonRef = (el: HTMLButtonElement | null, id: number | string) => {
         if (el) {
@@ -110,6 +156,8 @@
     });
 
     onMounted(async () => {
+        Object.values(pollingIntervals.value).forEach(clearInterval);
+        
         try {
             const data = await listTopics()
             topics.value = data               
@@ -129,6 +177,7 @@
             id: t.id,
             topic: t.titulo,
             hasSota: t.hasSota,
+            hasEntropy: t.hasEntropy,
             countPaper: t.papers
         }))
     )
@@ -304,11 +353,7 @@
                 position: 'center',
                 layout: 2,
             })
-
-            // Recargar lista
-            const data = await listTopics()
-            topics.value = data
-
+            pollSotaStatus(topic.id);
         } catch (error: any) {
             useToast().destroy()
             useToast().error({
@@ -322,6 +367,62 @@
             isLoading.value = false
         }
     }
+
+    const pollSotaStatus = (topicId: number) => {
+        if (pollingIntervals.value[topicId]) return;
+
+        const intervalId = setInterval(async () => {
+            try {
+                const response = await pollingMetrics(topicId)
+
+                if (response.status === 'completed') {
+                    console.log(`Polling para SOTA ${topicId} completado.`);
+                    clearInterval(intervalId);
+                    delete pollingIntervals.value[topicId];
+                    useToast().success({
+                        title: '¡Análisis Completo!',
+                        position: 'center',
+                        message: `Las métricas de entropía para el SOTA están disponibles.`,
+                        timeout: 5000,
+                    });
+                    const data = await listTopics();
+                    topics.value = data;
+                }
+                //Estado es 'pending', no hacemos nada y esperamos a la siguiente iteración.
+            } catch (error) {
+                console.error(`Error durante el polling para SOTA ${topicId}:`, error);
+                clearInterval(intervalId);
+                delete pollingIntervals.value[topicId];
+                useToast().error({ 
+                    title: 'Error',
+                    position: 'center',
+                    message: 'No se pudo verificar las métricas' 
+                });
+            }
+        }, 5000);
+
+        pollingIntervals.value[topicId] = intervalId;
+    }
+
+    const showAnalysisModal = async (topicId: number) => {
+        isLoadingImage.value    =   true;
+        imageUrl.value          =   null;
+        imageError.value        =   null;
+        
+        // try {
+        //     const data = await $fetch(`/api/sotas/view-metrics/${topicId}`);
+        //     if (data && data.imageUrl) {
+        //         imageUrl.value = data.imageUrl;
+        //     } else {
+        //         throw new Error("La ruta de la imagen no fue encontrada.");
+        //     }
+        // } catch (error: any) {
+        //     console.error("Error al obtener la imagen de análisis:", error);
+        //     imageError.value = "No se pudo cargar la imagen del análisis.";
+        // } finally {
+        //     isLoadingImage.value = false;
+        // }
+    };
 </script>
 
 <!-- <style scoped>
