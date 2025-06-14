@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     if (sota.img_entropy) {
         return {
             status: 'completed',
-            data: sota,
+            // data: sota,
         };
     } else {
         return {
