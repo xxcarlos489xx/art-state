@@ -10,9 +10,9 @@ from dotenv import load_dotenv
 import re
 
 # Logs
-script_dir = os.path.dirname(os.path.abspath(__file__))
-log_path = os.path.join(script_dir, "log_embed.txt")
-dotenv_path = os.path.join(script_dir, "..", ".env")
+script_dir  =   os.path.dirname(os.path.abspath(__file__))
+log_path    =   os.path.join(script_dir, "log_embed.txt")
+dotenv_path =   os.path.join(script_dir, "..", ".env")
 load_dotenv(dotenv_path)
 
 if len(sys.argv) < 4:

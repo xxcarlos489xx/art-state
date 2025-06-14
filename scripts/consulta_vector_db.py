@@ -146,9 +146,14 @@ def save_sota_to_db(topic_id, file_path):
                 INSERT INTO sotas (ruta, topic_id, version)
                 VALUES (%s, %s, %s)
             """
-            web_path = '/' + os.path.join(*file_path.split(os.sep)[-3:]).replace('\\', '/')
+
+            relative_path           =   file_path.split(os.sep + 'storage' + os.sep)[1]
+            relative_path_for_url   =   relative_path.replace('\\', '/')
+            web_path                =   f"/api/storage/{relative_path_for_url}"
+
             cursor.execute(insert_query, (web_path, topic_id, new_version))
             db_connection.commit()
+            write_log(f"Guardando sota docx: {web_path}")
             write_log(f"Registro de SOTA v{new_version} guardado en la BD para topic_id: {topic_id}")
             
     except mysql.connector.Error as e:
@@ -284,8 +289,8 @@ if __name__ == "__main__":
 
         save_body_to_pdf(sota_body_cleaned, path_pdf)
 
-        save_sota_to_db(topic_id, path_word)
         save_sota_to_docx(sota_result, topic_title, path_word)
+        save_sota_to_db(topic_id, path_word)
         
         write_log("Proceso completado.")
 

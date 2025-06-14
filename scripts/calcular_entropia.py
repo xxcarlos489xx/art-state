@@ -108,10 +108,15 @@ def update_sota_db(topic_id, image_path):
         if db_connection.is_connected():
             cursor = db_connection.cursor()
             query = "UPDATE sotas SET img_entropy = %s WHERE topic_id = %s"
-            # Ajusta esta lógica según cómo sirvas tus archivos estáticos
-            web_path = '/' + os.path.join(*image_path.split(os.sep)[-3:]).replace('\\', '/')
+            
+            relative_path           =   image_path.split(os.sep + 'storage' + os.sep)[1]
+            relative_path_for_url   =   relative_path.replace('\\', '/')
+            web_path                =   f"/api/storage/{relative_path_for_url}"
+
             cursor.execute(query, (web_path, topic_id))
             db_connection.commit()
+
+            write_log(f"Guardando ruta de imagen en BD: {web_path}")
             write_log(f"Ruta de análisis actualizada en BD - sotas para topic_id: {topic_id}")
     except Exception as e:
         write_log(f"ERROR de MySQL al actualizar ruta: {e}")
