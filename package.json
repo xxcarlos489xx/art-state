@@ -38,6 +38,7 @@
     "@pinia/nuxt": "^0.4.11",
     "@types/bcrypt": "^5.0.2",
     "@types/bootstrap": "^5.2.6",
+    "@types/mime-types": "^3.0.1",
     "perfect-scrollbar": "^1.5.5",
     "pinia": "^2.1.7",
     "prisma": "^6.8.2",

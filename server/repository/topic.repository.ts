@@ -40,7 +40,8 @@ export class TopicRepository {
           },
           select: {
             id: true,
-            img_entropy: true
+            img_entropy: true,
+            ruta:true
           }
         }
       }

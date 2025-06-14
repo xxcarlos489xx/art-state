@@ -15,8 +15,8 @@ export class TopicService {
 
     return topics.map(topic => {
       const firstSota   = Array.isArray(topic.sotas) && topic.sotas.length > 0 ? topic.sotas[0] : null;
-      const hasEntropy  = !!(firstSota?.img_entropy);
-      const hasSota     = firstSota ? true : false;
+      const hasEntropy  = firstSota ? topic.sotas[0].img_entropy : false;
+      const hasSota     = firstSota ? topic.sotas[0].ruta : false;
       const papers      = topic._count.papers
       const { sotas, _count, ...rest } = topic;
 

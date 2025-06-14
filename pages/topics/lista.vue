@@ -2,11 +2,11 @@
     <div class="page-heading">
         <div class="page-title">
             <div class="row">
-                <div class="col-12 col-md-6 order-md-1 order-last">
+                <div class="col-12 col-md-8 order-md-1 order-last">
                     <h3>Lista</h3>
-                    <p class="text-subtitle text-muted">Lista de topics.</p>
+                    <p class="text-subtitle text-muted">Para poder generar el estado del arte (sota), necesitas subir como mínimo 10 articulos en formato PDF que tengan disponible el nro de DOI. Una vez generado el sota, podrás calcular la entroía de tu fuentes y tu sota.</p>
                 </div>
-                <div class="col-12 col-md-6 order-md-2 order-first">
+                <div class="col-12 col-md-4 order-md-2 order-first">
                     <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item">
@@ -25,7 +25,7 @@
                         <th scope="col">Topic</th>
                         <th scope="col">Papers</th>
                         <th scope="col">State of the Art</th>
-                        <th scope="col">Métricas</th>
+                        <th scope="col">Análisis</th>
                         <th scope="col">Config</th>
                     </tr>
                 </thead>
@@ -33,14 +33,23 @@
                     <tr v-for="(fila, index) in filas" :key="index">
                     <td>{{ fila.topic }}</td>
                     <td>{{ fila.countPaper }}</td>
-                    <td>{{ fila.hasSota }}</td>
-                    <td>
+                    <td class="text-center">
+                        <button
+                            v-if="fila.hasSota"
+                            class="btn btn-sm btn-outline-success me-2"
+                            @click="descargarSota(fila.hasSota)"
+                        >
+                            <i class="bi bi-download"></i> Descargar
+                        </button>
+                        <span v-else class="text-muted">N/A</span>
+                    </td>
+                    <td class="text-center">
                         <button 
                                 v-if="fila.hasEntropy" 
                                 class="btn btn-sm btn-outline-info" 
                                 data-bs-toggle="modal"
                                 data-bs-target="#analysisModal"
-                                @click="showAnalysisModal(fila.id)"
+                                @click="showAnalysisModal(fila.hasEntropy)"
                             >
                             <i class="bi bi-bar-chart-line"></i> Ver Análisis
                         </button>
@@ -50,7 +59,7 @@
                         <div class="dropdown">
                         <button
                             :ref="el => setButtonRef(el, fila.id)"
-                            :disabled="isLoading"
+                            :disabled="isLoading || fila.disabled"
                             class="btn btn-secondary dropdown-toggle"
                             type="button"
                             data-bs-toggle="dropdown"
@@ -59,23 +68,32 @@
                             <i class="bi bi-gear"></i>
                         </button>
                         <ul class="dropdown-menu">
-                            <li>
-                                 <a class="dropdown-item" href="#" @click.prevent="promptFileUpload(fila)">
+                            <li v-show="!fila.hasSota">
+                                 <a class="dropdown-item" 
+                                    @click.prevent="promptFileUpload(fila)">
                                     <i class="bi bi-upload"></i>&nbsp;Cargar Paper
                                 </a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" @click.prevent="handleGenerateSota(fila)">
-                                    <i class="bi bi-brush"></i>&nbsp;Generar Sota
-                                </a>
+                            <li :class="(fila.countPaper >= 10) ? '' : 'blocked'" v-show="!fila.hasSota">
+                                <button class="dropdown-item"                               
+                                        :disabled="fila.hasSota < 10"
+                                        @click.prevent="handleGenerateSota(fila)">
+                                    <i class="bi bi-brush" v-if="fila.countPaper >= 10"></i>
+                                    <i class="bi bi-lock-fill" v-else></i>
+                                    &nbsp;Generar Sota
+                                </button>
                             </li>
-                            <li>
-                                <a class="dropdown-item" @click.prevent="handleGenerateEntropy(fila)">
-                                    <i class="bi bi-brush"></i>&nbsp;Calcular Entropía
-                                </a>
+                            <li :class="(fila.hasSota) ? '' : 'blocked'" v-show="!fila.hasEntropy">
+                                <button     class="dropdown-item"
+                                            :disabled="!fila.hasSota"
+                                            @click.prevent="handleGenerateEntropy(fila)">
+                                    <i class="bi bi-bar-chart-line" v-if="fila.hasSota"></i>
+                                    <i class="bi bi-lock-fill" v-else></i>
+                                    &nbsp;Calcular Entropía
+                                </button>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Ver más</a></li>
+                            <!-- <li><hr class="dropdown-divider"></li> -->
+                            <!-- <li><a class="dropdown-item" href="#">Ver más</a></li> -->
                         </ul>
                         </div>
                     </td>
@@ -178,7 +196,8 @@
             topic: t.titulo,
             hasSota: t.hasSota,
             hasEntropy: t.hasEntropy,
-            countPaper: t.papers
+            countPaper: t.papers,
+            disabled: t.hasEntropy && t.hasSota ? true : false
         }))
     )
 
@@ -404,27 +423,21 @@
         pollingIntervals.value[topicId] = intervalId;
     }
 
-    const showAnalysisModal = async (topicId: number) => {
-        isLoadingImage.value    =   true;
-        imageUrl.value          =   null;
+    const showAnalysisModal = async (path: string | null) => {
+        // isLoadingImage.value    =   true;
+        imageUrl.value          =   path;
         imageError.value        =   null;
-        
-        // try {
-        //     const data = await $fetch(`/api/sotas/view-metrics/${topicId}`);
-        //     if (data && data.imageUrl) {
-        //         imageUrl.value = data.imageUrl;
-        //     } else {
-        //         throw new Error("La ruta de la imagen no fue encontrada.");
-        //     }
-        // } catch (error: any) {
-        //     console.error("Error al obtener la imagen de análisis:", error);
-        //     imageError.value = "No se pudo cargar la imagen del análisis.";
-        // } finally {
-        //     isLoadingImage.value = false;
-        // }
+    };
+    const descargarSota = (ruta: string | null) => {
+        window.open(ruta as string, '_blank');
     };
 </script>
 
-<!-- <style scoped>
-
-</style> -->
+<style scoped>
+    .dropdown-menu{
+        cursor: pointer;
+    }
+    .blocked{
+        cursor: not-allowed!important;
+    }
+</style>
